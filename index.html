@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoadFlow | Traffic Dashboard</title>
+
+    <style>
+        :root {
+            --navy: #14263d;
+            --blue: #2864dc;
+            --teal: #16a085;
+            --ink: #263548;
+            --muted: #738197;
+            --line: #e5eaf1;
+            --background: #f3f6fa;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--ink);
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        .page {
+            width: min(1120px, calc(100% - 36px));
+            margin: 0 auto;
+            padding: 24px 0 36px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            display: grid;
+            width: 42px;
+            height: 42px;
+            place-items: center;
+            border-radius: 12px;
+            background: var(--navy);
+            color: white;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .brand-name {
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .brand-caption {
+            margin-top: 3px;
+            color: var(--muted);
+            font-size: 10px;
+            letter-spacing: 1.2px;
+        }
+
+        .dataset-label {
+            padding: 9px 13px;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            background: var(--white);
+            color: #53647a;
+            font-size: 12px;
+        }
+
+        .hero {
+            padding: 30px 34px;
+            border-radius: 18px;
+            background:
+                radial-gradient(circle at 85% 15%, #426ba5 0, transparent 30%),
+                linear-gradient(115deg, #14263d, #203d62);
+            color: white;
+        }
+
+        .eyebrow {
+            margin: 0 0 10px;
+            color: #a9c9ff;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+        }
+
+        .hero h1 {
+            max-width: 620px;
+            margin: 0;
+            font-size: clamp(25px, 4vw, 36px);
+            line-height: 1.15;
+        }
+
+        .hero p:last-child {
+            max-width: 650px;
+            margin: 12px 0 0;
+            color: #d0d9e7;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 330px minmax(0, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: var(--white);
+            box-shadow: 0 8px 24px #20334d0a;
+        }
+
+        .form-card {
+            padding: 23px;
+        }
+
+        .card-heading {
+            margin: 0;
+            font-size: 17px;
+        }
+
+        .card-description {
+            margin: 7px 0 22px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        label {
+            display: block;
+            margin: 17px 0 7px;
+            color: #40516a;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        select,
+        input {
+            width: 100%;
+            min-height: 44px;
+            padding: 10px 12px;
+            border: 1px solid #dce3ec;
+            border-radius: 9px;
+            background: white;
+            color: var(--ink);
+            font: inherit;
+            font-size: 14px;
+        }
+
+        select:focus,
+        input:focus {
+            border-color: var(--blue);
+            outline: 3px solid #2864dc20;
+        }
+
+        button {
+            width: 100%;
+            min-height: 46px;
+            margin-top: 22px;
+            border: 0;
+            border-radius: 9px;
+            background: var(--blue);
+            color: white;
+            cursor: pointer;
+            font: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            background: #1f53be;
+        }
+
+        .form-note {
+            margin: 14px 0 0;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .results-column {
+            display: grid;
+            gap: 20px;
+            align-content: start;
+        }
+
+        .summary-card {
+            padding: 23px;
+        }
+
+        .summary-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .summary-header h2 {
+            margin: 0;
+            font-size: 17px;
+        }
+
+        .estimate-tag {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .metric {
+            min-height: 94px;
+            padding: 15px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: #fbfcfe;
+        }
+
+        .metric-label {
+            display: block;
+            margin-bottom: 9px;
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .traffic-level {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .traffic-level.low {
+            background: #e5f7ef;
+            color: #147a4b;
+        }
+
+        .traffic-level.medium {
+            background: #fff4d9;
+            color: #946200;
+        }
+
+        .traffic-level.high {
+            background: #fde8e8;
+            color: #b42323;
+        }
+
+        .chart-card {
+            padding: 20px;
+        }
+
+        .chart-card h2 {
+            margin: 0 0 4px;
+            font-size: 16px;
+        }
+
+        .chart-card p {
+            margin: 0 0 14px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .chart-card img {
+            display: block;
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+        }
+
+        .empty-card {
+            display: grid;
+            min-height: 260px;
+            padding: 30px;
+            place-items: center;
+            text-align: center;
+        }
+
+        .empty-icon {
+            display: grid;
+            width: 54px;
+            height: 54px;
+            margin: 0 auto 14px;
+            place-items: center;
+            border-radius: 16px;
+            background: #eaf0ff;
+            color: var(--blue);
+            font-size: 24px;
+        }
+
+        .empty-card h2 {
+            margin: 0;
+            font-size: 17px;
+        }
+
+        .empty-card p {
+            max-width: 350px;
+            margin: 8px auto 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .error {
+            padding: 13px 15px;
+            border: 1px solid #f3c6c6;
+            border-radius: 10px;
+            background: #fff1f1;
+            color: #a21d1d;
+            font-size: 13px;
+        }
+
+        .footer {
+            margin-top: 20px;
+            color: var(--muted);
+            font-size: 11px;
+            text-align: center;
+        }
+
+        @media (max-width: 760px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                padding: 25px 22px;
+            }
+
+            .dataset-label {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="page">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-icon">RF</div>
+                <div>
+                    <div class="brand-name">RoadFlow</div>
+                    <div class="brand-caption">TRAFFIC ANALYSIS DASHBOARD</div>
+                </div>
+            </div>
+            <div class="dataset-label">Historical traffic data</div>
+        </header>
+
+        <section class="hero">
+            <p class="eyebrow">ROAD TRAFFIC INSIGHTS</p>
+            <h1>Explore traffic patterns by location and time.</h1>
+            <p>
+                Choose a junction and date/time to view an estimated vehicle
+                count, traffic level, and historical trend.
+            </p>
+        </section>
+
+        <div class="layout">
+            <section class="card form-card">
+                <h2 class="card-heading">Choose your inputs</h2>
+                <p class="card-description">
+                    Select a location and the date and time you want to analyze.
+                </p>
+
+                <form method="POST">
+                    <label for="junction">Location</label>
+                    <select id="junction" name="junction" required>
+                        <option value="">Select a location</option>
+
+                        {% for junction_id, location_name in locations %}
+                            <option
+                                value="{{ junction_id }}"
+                                {% if selected_junction|string == junction_id|string %}selected{% endif %}
+                            >
+                                {{ location_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+
+                    <label for="datetime">Date and time</label>
+                    <input
+                        id="datetime"
+                        type="datetime-local"
+                        name="datetime"
+                        value="{{ selected_datetime }}"
+                        required
+                    >
+
+                    <button type="submit">Analyze traffic</button>
+
+                    <p class="form-note">
+                        Results are estimates based on the historical dataset.
+                        They are not live traffic updates.
+                    </p>
+                </form>
+            </section>
+
+            <section class="results-column">
+                {% if error %}
+                    <div class="error">{{ error }}</div>
+                {% endif %}
+
+                {% if result %}
+                    <section class="card summary-card">
+                        <div class="summary-header">
+                            <h2>Prediction summary</h2>
+                            <span class="estimate-tag">Model estimate</span>
+                        </div>
+
+                        <div class="metrics">
+                            <div class="metric">
+                                <span class="metric-label">Location</span>
+                                <span class="metric-value">{{ result.location }}</span>
+                            </div>
+
+                            <div class="metric">
+                                <span class="metric-label">Estimated vehicles/hour</span>
+                                <span class="metric-value">{{ result.vehicles }}</span>
+                            </div>
+
+                            <div class="metric">
+                                <span class="metric-label">Traffic level</span>
+                                <span class="traffic-level {{ result.level|lower }}">
+                                    {{ result.level }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <p class="card-description" style="margin: 15px 0 0;">
+                            Selected time: {{ result.time }}
+                        </p>
+                    </section>
+
+                    <section class="card chart-card">
+                        <h2>Traffic trend</h2>
+                        <p>Recent historical vehicle counts and the prediction</p>
+                        <img
+                            src="{{ url_for('static', filename='forecast.png', v=chart_version) }}"
+                            alt="Chart of historical traffic and predicted vehicle count"
+                        >
+                    </section>
+                {% else %}
+                    <section class="card empty-card">
+                        <div>
+                            <div class="empty-icon">↗</div>
+                            <h2>Your analysis will appear here</h2>
+                            <p>
+                                Choose a location and date/time, then select
+                                <strong>Analyze traffic</strong> to see the
+                                prediction and chart.
+                            </p>
+                        </div>
+                    </section>
+                {% endif %}
+            </section>
+        </div>
+
+        <footer class="footer">
+            RoadFlow · Student traffic analysis project
+        </footer>
+    </main>
+</body>
+</html>
